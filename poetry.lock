@@ -455,6 +455,21 @@ files = [
 ]
 
 [[package]]
+name = "isort"
+version = "8.0.1"
+description = "A Python utility / library to sort Python imports."
+optional = false
+python-versions = ">=3.10.0"
+groups = ["main"]
+files = [
+    {file = "isort-8.0.1-py3-none-any.whl", hash = "sha256:28b89bc70f751b559aeca209e6120393d43fbe2490de0559662be7a9787e3d75"},
+    {file = "isort-8.0.1.tar.gz", hash = "sha256:171ac4ff559cdc060bcfff550bc8404a486fee0caab245679c2abe7cb253c78d"},
+]
+
+[package.extras]
+colors = ["colorama"]
+
+[[package]]
 name = "librt"
 version = "0.8.1"
 description = "Mypyc runtime library"
@@ -1788,4 +1803,4 @@ files = [
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.13"
-content-hash = "ed27bc3dcf795a4c6b0a45f57f76dcfd1073b7fab5907552e6d6d506154136da"
+content-hash = "dfd88f8fc939b44430a79a4f20f2017972f3d27d7e3cc287188ab5c4cdb7b4d9"

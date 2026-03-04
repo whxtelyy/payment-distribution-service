@@ -5,7 +5,9 @@ from app.models.wallet import Wallet
 from app.schemas.wallet import WalletCreate
 
 
-async def create_wallet(wallet_data: WalletCreate, user_id: int, db: AsyncSession) -> Wallet:
+async def create_wallet(
+    wallet_data: WalletCreate, user_id: int, db: AsyncSession
+) -> Wallet:
     wallet = Wallet(**wallet_data.model_dump(), user_id=user_id)
     db.add(wallet)
     await db.commit()

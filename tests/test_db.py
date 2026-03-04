@@ -1,10 +1,12 @@
 import asyncio
+
 from sqlalchemy import text
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.session import AsyncSessionLocal
 
 
-async def test_db(command: str):
+async def test_db(command: str) -> None:
     async with AsyncSessionLocal() as connection:
         result = await connection.execute(text(command))
         print(f"Ответ базы: {result.scalar()}")

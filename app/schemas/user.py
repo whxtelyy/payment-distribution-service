@@ -1,7 +1,6 @@
 from datetime import datetime
-from decimal import Decimal
 
-from pydantic import BaseModel, ConfigDict, EmailStr
+from pydantic import BaseModel, ConfigDict, EmailStr, Field
 
 
 class UserBase(BaseModel):
@@ -10,12 +9,11 @@ class UserBase(BaseModel):
 
 
 class UserCreate(UserBase):
-    password: str
+    password: str = Field(max_length=72)
 
 
 class UserRead(UserBase):
     id: int
-    balance: Decimal
     is_active: bool
     created_at: datetime
     model_config = ConfigDict(from_attributes=True)

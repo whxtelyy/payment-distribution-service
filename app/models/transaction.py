@@ -17,9 +17,9 @@ class TransactionStatus(enum.Enum):
 
 class Transaction(Base):
     __tablename__ = "transactions"
-    id: Mapped[int] = mapped_column(nullable=False, primary_key=True)
-    sender_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=False)
-    receiver_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=False)
+    id: Mapped[int] = mapped_column(nullable=False, primary_key=True, index=True)
+    sender_wallet_id: Mapped[int] = mapped_column(ForeignKey("wallets.id"), nullable=False, index=True)
+    receiver_wallet_id: Mapped[int] = mapped_column(ForeignKey("wallets.id"), nullable=False, index=True)
     amount: Mapped[Decimal] = mapped_column(Numeric(10, 2), nullable=False)
     status: Mapped[TransactionStatus] = mapped_column(
         EnumSQL(TransactionStatus), nullable=False

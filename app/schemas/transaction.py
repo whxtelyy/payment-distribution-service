@@ -9,7 +9,7 @@ from app.models.transaction import TransactionStatus
 class TransactionBase(BaseModel):
     receiver_wallet_id: int
     amount: Decimal
-    
+
 
 class TransactionCreate(TransactionBase):
     pass

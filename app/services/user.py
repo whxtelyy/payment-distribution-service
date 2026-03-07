@@ -20,3 +20,8 @@ async def create_user(user_in: UserCreate, db: AsyncSession) -> User:
 async def get_user_by_email(email: str, db: AsyncSession) -> User | None:
     result = await db.execute(select(User).where(User.email == email))
     return result.scalars().first()
+
+
+async def get_user_by_id(id: str, db: AsyncSession) -> User | None:
+    result = await db.execute(select(User).where(User.id == id))
+    return result.scalars().first()

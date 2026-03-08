@@ -17,9 +17,7 @@ async def login(
     db_user = await get_user_by_email(form_data.username, db)
     if db_user is None:
         raise HTTPException(status_code=401, detail="Incorrect login or password")
-    else:
-        if verify_password(form_data.password, db_user.hashed_password) is False:
-            raise HTTPException(status_code=401, detail="Incorrect login or password")
-        else:
-            access_token = token_generation(db_user.id)
-            return {"access_token": access_token, "token_type": "bearer"}
+    if verify_password(form_data.password, db_user.hashed_password) is False:
+        raise HTTPException(status_code=401, detail="Incorrect login or password")
+    access_token = token_generation(db_user.id)
+    return {"access_token": access_token, "token_type": "bearer"}

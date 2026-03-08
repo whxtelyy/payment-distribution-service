@@ -7,6 +7,7 @@ from sqlalchemy import ForeignKey, Numeric, func
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.db.base import Base
+from app.models.wallet import WalletCurrency
 
 
 class TransactionStatus(enum.Enum):
@@ -25,6 +26,9 @@ class Transaction(Base):
         ForeignKey("wallets.id"), nullable=False, index=True
     )
     amount: Mapped[Decimal] = mapped_column(Numeric(10, 2), nullable=False)
+    currency: Mapped[WalletCurrency] = mapped_column(
+        EnumSQL(WalletCurrency), nullable=False
+    )
     status: Mapped[TransactionStatus] = mapped_column(
         EnumSQL(TransactionStatus), nullable=False
     )

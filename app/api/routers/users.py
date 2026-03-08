@@ -9,10 +9,10 @@ from app.services.user import create_user, get_user_by_email
 router = APIRouter(prefix="/users", tags=["users"])
 
 
-@router.post("/", response_model=UserRead)
+@router.post("/", response_model=UserRead, status_code=201)
 async def registration(user: UserCreate, db: AsyncSession = Depends(get_db)) -> User:
-    if await get_user_by_email(user.email, db) is None:
-        new_user = await create_user(user, db)
-        return new_user
-    else:
+    if await get_user_by_email(user.email, db) is not None:
         raise HTTPException(status_code=400, detail="User already exists")
+    new_user = await create_user(user, db)
+    return new_user
+        

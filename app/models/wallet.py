@@ -2,7 +2,7 @@ import enum
 from datetime import datetime
 from decimal import Decimal
 
-from sqlalchemy import Enum as EnumSQL
+from sqlalchemy import Enum as EnumSQL, UniqueConstraint
 from sqlalchemy import ForeignKey, Numeric, func
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -27,3 +27,4 @@ class Wallet(Base):
     )
     is_active: Mapped[bool] = mapped_column(default=True, nullable=False)
     created_at: Mapped[datetime] = mapped_column(default=func.now(), nullable=False)
+    __table_args__ = (UniqueConstraint("user_id", "currency", name="uq_user_wallet_currency"),)

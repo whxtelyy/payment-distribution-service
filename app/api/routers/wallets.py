@@ -14,7 +14,7 @@ from app.services.wallet import (
     get_wallet_by_user_id,
     make_transfer,
     get_user_transactions,
-    get_wallet_by_id
+    get_wallet_by_id,
 )
 
 router = APIRouter(prefix="/wallets", tags=["wallets"])
@@ -26,11 +26,15 @@ async def create(
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ) -> Wallet:
-    if await get_wallet_by_user_id(current_user.id, wallet.currency, db, False) is not None:
-        raise HTTPException(status_code=400, detail="Wallet with this currency already exists for the user")
+    if (
+        await get_wallet_by_user_id(current_user.id, wallet.currency, db, False)
+        is not None
+    ):
+        raise HTTPException(
+            status_code=400,
+            detail="Wallet with this currency already exists for the user",
+        )
     new_wallet = await create_wallet(wallet, current_user.id, db)
-    await db.commit()
-    await db.refresh(new_wallet)
     return new_wallet
 
 
@@ -38,7 +42,9 @@ async def create(
 async def get_balance(
     current_user: User = Depends(get_current_user), db: AsyncSession = Depends(get_db)
 ) -> Wallet:
-    result_wallet = await get_wallet_by_user_id(current_user.id, WalletCurrency.RUB, db, False)
+    result_wallet = await get_wallet_by_user_id(
+        current_user.id, WalletCurrency.RUB, db, False
+    )
 
     if result_wallet is None:
         raise HTTPException(status_code=404, detail="No such wallet found")
@@ -55,19 +61,13 @@ async def update_balance_wallet(
         raise HTTPException(status_code=403, detail="This user is not admin")
     wallet = await get_wallet_by_user_id(current_user.id, WalletCurrency.RUB, db, False)
     if wallet is None:
-        new_wallet = await create_wallet(
+        return await create_wallet(
             WalletCreate(balance=deposit_data.amount, currency="rub"),
             current_user.id,
             db,
         )
-        await db.commit()
-        await db.refresh(new_wallet)
-        return new_wallet
     else:
-        update_wallet = await update_balance(wallet.id, deposit_data.amount, db)
-        await db.commit()
-        await db.refresh(update_wallet)
-        return update_wallet
+        return await update_balance(wallet.id, deposit_data.amount, db)
 
 
 @router.post("/transfer", response_model=TransactionRead, status_code=200)
@@ -76,23 +76,21 @@ async def make_transfer_wallet(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ) -> Transaction:
-    if transfer_data.receiver_wallet_id == transfer_data.sender_wallet_id:
-        raise HTTPException(
-            status_code=400, detail="You cannot transfer money to yourself"
-        )
     try:
-        sender_wallet = await get_wallet_by_id(transfer_data.sender_wallet_id, db, False)
-        if sender_wallet is None or sender_wallet.user_id != current_user.id:
-            raise HTTPException(status_code=403, detail="Access denied")
         transfer_result = await make_transfer(
-            transfer_data.sender_wallet_id, transfer_data.receiver_wallet_id, transfer_data.amount, db
+            current_user.id,
+            transfer_data.sender_wallet_id,
+            transfer_data.receiver_wallet_id,
+            transfer_data.amount,
+            db,
+            transfer_data.idempotency_key,
         )
         return transfer_result
     except ValueError as error:
         raise HTTPException(status_code=400, detail=str(error))
 
 
-@router.get("/transactions", response_model=list[TransactionRead])
+@router.get("/transactions", response_model=list[TransactionRead], status_code=200)
 async def get_transactions(
     current_user: User = Depends(get_current_user),
     limit: int = Query(20, ge=1, le=100),

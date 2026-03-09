@@ -10,7 +10,8 @@ from app.models.wallet import WalletCurrency
 
 class TransactionBase(BaseModel):
     receiver_wallet_id: int
-    amount: Decimal = Field(gt=0.01)
+    amount: Decimal = Field(gt=0.01, decimal_places=2)
+    currency: WalletCurrency
 
 
 class TransactionCreate(TransactionBase):
@@ -22,7 +23,6 @@ class TransactionCreate(TransactionBase):
 class TransactionRead(TransactionBase):
     id: int
     status: TransactionStatus
-    currency: WalletCurrency
     idempotency_key: UUID | str | None = None
     timestamp: datetime
     model_config = ConfigDict(from_attributes=True)

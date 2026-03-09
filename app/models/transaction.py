@@ -35,7 +35,7 @@ class Transaction(Base):
         EnumSQL(TransactionStatus), nullable=False
     )
     idempotency_key: Mapped[str] = mapped_column(
-        String(50), unique=True, nullable=True, index=True
+        String(100), unique=True, nullable=True, index=True
     )
     timestamp: Mapped[datetime] = mapped_column(
         server_default=func.now(), nullable=False, index=True)

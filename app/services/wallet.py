@@ -43,18 +43,15 @@ async def get_wallet_by_user_id(
 
 
 async def update_balance(
-    wallet_id: int, amount: Decimal, db: AsyncSession
+    user_id: int, currency: str, amount: Decimal, db: AsyncSession
 ) -> Wallet | None:
-    result = await db.execute(
-        update(Wallet)
-        .values(balance=Wallet.balance + amount)
-        .where(Wallet.id == wallet_id)
-        .returning(Wallet)
-    )
-    wallet = result.scalar_one_or_none()
-    await db.commit()
+    wallet = await get_wallet_by_user_id(user_id, currency, db, False)
     if wallet is None:
-        raise AttributeError("Wallet not found")
+        wallet = Wallet(user_id=user_id, balance=amount, currency=currency)
+    else:
+        wallet.balance += amount
+    db.add(wallet)
+    await db.commit()
     await db.refresh(wallet)
     return wallet
 
@@ -119,25 +116,43 @@ async def make_transfer(
                     Transaction.idempotency_key == idempotency_key
                 )
             )
-            return result.scalar_one_or_none()
+            result = result.scalar_one_or_none()
+            if result is None:
+                raise IntegrityError(
+                    "There was no idempotency key or nothing was found"
+                )
+            return result
     except Exception as error:
         await db.rollback()
         raise error
 
 
 async def get_user_transactions(
-    wallet_id: int, limit_tr: int, skip: int, db: AsyncSession
+    wallet_ids: list[int], limit_tr: int | None, skip: int | None, db: AsyncSession
 ) -> list[Transaction]:
     result = await db.execute(
         select(Transaction)
         .where(
-            or_(
-                wallet_id == Transaction.sender_wallet_id,
-                wallet_id == Transaction.receiver_wallet_id,
+        or_(
+            Transaction.sender_wallet_id.in_(wallet_ids),
+            Transaction.receiver_wallet_id.in_(wallet_ids),
             )
         )
         .order_by(Transaction.timestamp.desc())
         .limit(limit_tr)
         .offset(skip)
     )
-    return result.scalars().all()
+    return list(result.scalars().all())
+
+
+async def get_user_all_wallets(
+    user_id: int, db: AsyncSession
+) -> list[Wallet]:
+    result = await db.execute(
+        select(Wallet)
+        .where(
+            Wallet.user_id == user_id
+        )
+        .order_by(Wallet.currency.asc())
+    )
+    return list(result.scalars().all())

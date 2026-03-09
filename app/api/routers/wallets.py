@@ -15,6 +15,7 @@ from app.services.wallet import (
     make_transfer,
     get_user_transactions,
     get_wallet_by_id,
+    get_user_all_wallets,
 )
 
 router = APIRouter(prefix="/wallets", tags=["wallets"])
@@ -59,15 +60,9 @@ async def update_balance_wallet(
 ) -> Wallet:
     if current_user.email != "isaev_saveliy_d@mail.ru":
         raise HTTPException(status_code=403, detail="This user is not admin")
-    wallet = await get_wallet_by_user_id(current_user.id, WalletCurrency.RUB, db, False)
-    if wallet is None:
-        return await create_wallet(
-            WalletCreate(balance=deposit_data.amount, currency="rub"),
-            current_user.id,
-            db,
-        )
-    else:
-        return await update_balance(wallet.id, deposit_data.amount, db)
+    return await update_balance(
+        current_user.id, deposit_data.currency, deposit_data.amount, db
+    )
 
 
 @router.post("/transfer", response_model=TransactionRead, status_code=200)
@@ -93,13 +88,19 @@ async def make_transfer_wallet(
 @router.get("/transactions", response_model=list[TransactionRead], status_code=200)
 async def get_transactions(
     current_user: User = Depends(get_current_user),
+    currency: WalletCurrency | None = Query(None),
     limit: int = Query(20, ge=1, le=100),
     skip: int = Query(0, ge=0, le=100),
     db: AsyncSession = Depends(get_db),
 ) -> list[Transaction]:
-    wallet = await get_wallet_by_user_id(current_user.id, WalletCurrency.RUB, db, False)
-    if wallet is None:
-        return []
+    if currency:
+        wallet = await get_wallet_by_user_id(current_user.id, currency, db, False)
+        if wallet is None:
+            return []
+        return await get_user_transactions([wallet.id], limit, skip, db)
     else:
-        new_transaction = await get_user_transactions(wallet.id, limit, skip, db)
-        return new_transaction
+        wallets = await get_user_all_wallets(current_user.id, db)
+        wallets_ids = [w.id for w in wallets]
+        if not wallets_ids:
+            return []
+        return await get_user_transactions(wallets_ids, limit, skip, db)

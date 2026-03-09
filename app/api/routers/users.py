@@ -15,4 +15,3 @@ async def registration(user: UserCreate, db: AsyncSession = Depends(get_db)) -> 
         raise HTTPException(status_code=400, detail="User already exists")
     new_user = await create_user(user, db)
     return new_user
-        

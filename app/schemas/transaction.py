@@ -1,5 +1,6 @@
 from datetime import datetime
 from decimal import Decimal
+from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -14,6 +15,7 @@ class TransactionBase(BaseModel):
 
 class TransactionCreate(TransactionBase):
     sender_wallet_id: int
+    idempotency_key: UUID | str | None = None
     pass
 
 
@@ -21,5 +23,6 @@ class TransactionRead(TransactionBase):
     id: int
     status: TransactionStatus
     currency: WalletCurrency
+    idempotency_key: UUID | str | None = None
     timestamp: datetime
     model_config = ConfigDict(from_attributes=True)

@@ -1,6 +1,8 @@
+import app.core.logging_config
+
 from fastapi import FastAPI
 
-from app.api.routers import users, wallets, auth
+from app.api.routers import auth, users, wallets
 
 app = FastAPI()
 

@@ -1,7 +1,6 @@
 import asyncio
 
 from sqlalchemy import text
-from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.session import AsyncSessionLocal
 

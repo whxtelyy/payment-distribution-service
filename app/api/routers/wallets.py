@@ -14,7 +14,6 @@ from app.services.wallet import (
     get_wallet_by_user_id,
     make_transfer,
     get_user_transactions,
-    get_wallet_by_id,
     get_user_all_wallets,
 )
 

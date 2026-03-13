@@ -1,9 +1,11 @@
+from datetime import datetime, timezone
 from decimal import Decimal
 
-from sqlalchemy import select, update, or_, and_
+from sqlalchemy import select, or_, and_
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.tasks import completing_tasks
 from app.core.external.currency_api import get_exchange_rate
 from app.models.transaction import Transaction, TransactionStatus
 from app.models.wallet import Wallet
@@ -103,11 +105,13 @@ async def make_transfer(
             currency=sender_wallet.currency,
             status=TransactionStatus.SUCCESS,
             idempotency_key=idempotency_key,
+            timestamp=datetime.now(timezone.utc)
         )
         db.add(new_transaction)
         try:
             await db.commit()
             await db.refresh(new_transaction)
+            await completing_tasks.kiq(transaction_id=int(new_transaction.id))
             return new_transaction
         except IntegrityError:
             await db.rollback()
@@ -121,6 +125,7 @@ async def make_transfer(
                 raise IntegrityError(
                     "There was no idempotency key or nothing was found"
                 )
+            await completing_tasks.kiq(transaction_id=int(result.id))
             return result
     except Exception as error:
         await db.rollback()

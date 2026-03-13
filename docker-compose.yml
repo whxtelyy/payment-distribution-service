@@ -1,14 +1,41 @@
 services:
   postgres_db:
     image: postgres:15-alpine
+    container_name: postgres_db_payment_servise
     restart: always
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: ${POSTGRES_DB}
     ports:
-    - "5432:5432"
+    - "${POSTGRES_DB_PORT}:${POSTGRES_DB_PORT}"
+    networks:
+    - payment_service_network
     volumes:
     - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      retries: 3
+      timeout: 5s
+  redis:
+    image: redis:7-alpine
+    container_name: redis_payment_servise
+    restart: unless-stopped
+    ports:
+    - "${REDIS_PORT}:${REDIS_PORT}"
+    networks:
+    - payment_service_network
+    volumes:
+    - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      retries: 3
+      timeout: 5s
+
+networks:
+  payment_service_network:
+    driver: bridge
+
 volumes:
   pgdata:
+  redis_data:

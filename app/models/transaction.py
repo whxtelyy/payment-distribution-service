@@ -3,7 +3,7 @@ from datetime import datetime
 from decimal import Decimal
 
 from sqlalchemy import Enum as EnumSQL
-from sqlalchemy import ForeignKey, Numeric, func, String, CheckConstraint
+from sqlalchemy import ForeignKey, Numeric, func, String, CheckConstraint, DateTime
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.db.base import Base
@@ -38,4 +38,6 @@ class Transaction(Base):
         String(100), unique=True, nullable=True, index=True
     )
     timestamp: Mapped[datetime] = mapped_column(
-        server_default=func.now(), nullable=False, index=True)
+        DateTime(timezone=True), server_default=func.now(),
+        nullable=False, index=True
+    )

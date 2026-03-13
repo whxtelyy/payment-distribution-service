@@ -7,6 +7,8 @@ class Settings(BaseSettings):
     POSTGRES_DB: str
     POSTGRES_DB_PORT: int
     SECRET_KEY: str
+    REDIS_PORT: int
+    REDIS_DB: int
     
     model_config = SettingsConfigDict(env_file=".env")
 

@@ -8,7 +8,7 @@ from app.core.config import settings
 
 engine = create_async_engine(
     f"postgresql+asyncpg://{settings.POSTGRES_USER}:{settings.POSTGRES_PASSWORD}@localhost:{settings.POSTGRES_DB_PORT}/{settings.POSTGRES_DB}",
-    echo=True,
+    echo=False,
 )
 
 AsyncSessionLocal = async_sessionmaker(

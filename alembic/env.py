@@ -51,9 +51,7 @@ def run_migrations_offline() -> None:
     script output.
 
     """
-    url = config.get_main_option(
-        f"postgresql+asyncpg://{settings.POSTGRES_USER}:{settings.POSTGRES_PASSWORD}@localhost:{settings.POSTGRES_DB_PORT}/{settings.POSTGRES_DB}"
-    )
+    url = f"postgresql+asyncpg://{settings.POSTGRES_USER}:{settings.POSTGRES_PASSWORD}@{settings.POSTGRES_SERVER}:{settings.POSTGRES_DB_PORT}/{settings.POSTGRES_DB}"
     context.configure(
         url=url,
         target_metadata=target_metadata,
@@ -79,9 +77,9 @@ async def run_async_migrations() -> None:
     """
 
     connectable = create_async_engine(
-    f"postgresql+asyncpg://{settings.POSTGRES_USER}:{settings.POSTGRES_PASSWORD}@localhost:{settings.POSTGRES_DB_PORT}/{settings.POSTGRES_DB}",
-    poolclass=pool.NullPool,
-)
+        settings.database_url,
+        poolclass=pool.NullPool,
+    )
 
     async with connectable.connect() as connection:
         await connection.run_sync(do_run_migrations)

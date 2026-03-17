@@ -1,37 +1,84 @@
 services:
   postgres_db:
     image: postgres:15-alpine
-    container_name: postgres_db_payment_servise
+    container_name: postgres_db_payment_service
     restart: always
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: ${POSTGRES_DB}
     ports:
-    - "${POSTGRES_DB_PORT}:${POSTGRES_DB_PORT}"
+    - "${POSTGRES_DB_PORT}:5432"
     networks:
     - payment_service_network
     volumes:
     - pgdata:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
-      retries: 3
+      interval: 10s
       timeout: 5s
+      retries: 5
+  
   redis:
     image: redis:7-alpine
-    container_name: redis_payment_servise
+    container_name: redis_payment_service
     restart: unless-stopped
     ports:
-    - "${REDIS_PORT}:${REDIS_PORT}"
+    - "${REDIS_PORT}:6379"
     networks:
     - payment_service_network
     volumes:
     - redis_data:/data
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
       retries: 3
       timeout: 5s
 
+  api:
+    build: .
+    container_name: fastapi_app
+    restart: always
+    volumes:
+     - ./logs:/app/logs
+    command: > 
+      sh -c "alembic upgrade head &&
+            pytest tests/ && 
+            uvicorn app.main:app --host 0.0.0.0 --port 8000"
+    env_file:
+      - .env
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres_db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - payment_service_network
+    environment:
+      - DATABASE_URL=postgresql+asyncpg://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres_db:5432/${POSTGRES_DB}
+      - REDIS_URL=redis://redis:6379/0
+
+  worker:
+    build: .
+    container_name: taskiq_worker
+    restart: always
+    volumes:
+     - ./logs:/app/logs
+    command: taskiq worker app.core.tqk:broker
+    env_file:
+      - .env
+    depends_on:
+      api:
+        condition: service_started
+      redis:
+        condition: service_healthy
+    networks:
+      - payment_service_network
+    environment:
+      - DATABASE_URL=postgresql+asyncpg://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres_db:5432/${POSTGRES_DB}
+      - REDIS_URL=redis://redis:6379/0
 networks:
   payment_service_network:
     driver: bridge

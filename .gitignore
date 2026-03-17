@@ -66,4 +66,5 @@ docker-compose.override.yml
 # --- OS файлы ---
 .DS_Store
 Thumbs.db
-transaction.log
+logs/
+*.log

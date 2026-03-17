@@ -66,10 +66,17 @@ async def make_transfer(
     db: AsyncSession,
     idempotency_key: str | None = None,
 ) -> Transaction:
+    if idempotency_key:
+        result = await db.execute(select(Transaction).where(Transaction.idempotency_key == idempotency_key))
+        existing_transaction = result.scalar_one_or_none()
+        if existing_transaction:
+            return existing_transaction
     try:
         if sender_wallet_id == receiver_wallet_id:
             raise ValueError("You cannot transfer money to yourself")
         sender_wallet = await get_wallet_by_id(sender_wallet_id, db, False)
+        if sender_wallet is None:
+            raise ValueError("Wallet not found")
         if sender_wallet.user_id != current_user_id:
             raise ValueError("Access denied")
         receiver_wallet = await get_wallet_by_id(receiver_wallet_id, db, False)

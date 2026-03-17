@@ -9,7 +9,7 @@ from app.core.security import verify_password, token_generation
 router = APIRouter(prefix="/login", tags=["login"])
 
 
-@router.post("/")
+@router.post("/", status_code=200)
 async def login(
     db: AsyncSession = Depends(get_db),
     form_data: OAuth2PasswordRequestFormStrict = Depends(),

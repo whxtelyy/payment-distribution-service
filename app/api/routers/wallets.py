@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.dependencies.auth import get_current_user
+from app.core.config import settings
 from app.db.session import get_db
 from app.models.transaction import Transaction
 from app.schemas.transaction import TransactionBase, TransactionCreate, TransactionRead
@@ -57,7 +58,10 @@ async def update_balance_wallet(
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ) -> Wallet:
-    if current_user.email != "isaev_saveliy_d@mail.ru":
+    if (
+        current_user.email != settings.ADMIN_EMAIL
+        or current_user.username != settings.ADMIN_USERNAME
+    ):
         raise HTTPException(status_code=403, detail="This user is not admin")
     return await update_balance(
         current_user.id, deposit_data.currency, deposit_data.amount, db

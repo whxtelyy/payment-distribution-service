@@ -20,5 +20,13 @@ broker.with_result_backend(result_backend)
 
 
 async def get_redis_conn() -> AsyncGenerator[redis.asyncio.Redis | None]:
+    """
+    Создает и отдает ассинхронное соединение с Redis.
+
+    Особенности:
+    1) Используется как Dependency.
+    2) Гарантирует закрытие соединения после завершения работы (через контекстный менеджер).
+    3) Поддерживает автоматический пул соединений через redis-py.
+    """
     async with redis.asyncio.from_url(REDIS_URL) as connect:
         yield connect

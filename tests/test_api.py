@@ -6,6 +6,12 @@ from .config import override_get_db, get_user, mock_refresh, client_test
 
 @pytest.mark.asyncio
 async def test_create_user(client_test, mock_refresh):
+    """
+    Проверка регистрации нового пользователя.
+
+    Мокается ситуация, когда email/username свободны.
+    Тест проверяет корректность хэширования и вызов метода .add() у сессии БД.
+    """
     override_get_db.reset_mock()
     override_get_db.add = MagicMock()
     mock_result = MagicMock()
@@ -20,6 +26,13 @@ async def test_create_user(client_test, mock_refresh):
 
 @pytest.mark.asyncio
 async def test_auth_user(client_test):
+    """
+    Проверка успешного входа (Login).
+
+    Сценарий:
+    1) Мокается получение пользователя из БД по username.
+    2) Проверяется выдача JWT-токена при совпадении пароля.
+    """
     override_get_db.reset_mock()
     mock_result = MagicMock()
     fake_user = await get_user()
@@ -32,6 +45,12 @@ async def test_auth_user(client_test):
 
 @pytest.mark.asyncio
 async def test_create_wallet(client_test, mock_refresh):
+    """
+    Проверка создания кошелька для текущего пользователя.
+
+    Условие: у пользователя ещё нет кошелька в указанной валюте (scalar_one_or_none возвращает None).
+    Проверяется корректность маппинга валюты в JSON-ответе.
+    """
     override_get_db.reset_mock()
     override_get_db.add = MagicMock()
     mock_result = MagicMock()

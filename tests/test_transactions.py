@@ -9,6 +9,15 @@ from .config import client_test, get_user, mock_refresh, override_get_db
 
 @pytest.mark.asyncio
 async def test_succes_transaction(client_test, mock_refresh, mocker):
+    """
+    Интеграционный тест успешного межбалансного перевода.
+
+    Сценарий:
+    1) Проверяет расчёт балансов: списание у отправителя и зачисление получателю.
+    2) Проверяет интеграцию с Taskiq: вызов фоновой задачи для финализации транзакции.
+    3) Проверяет идемпотентность: имитирует проверку уникальности запроса перед созданием записи.
+    4) Проверяет использование курса валют: проверяет вызов сервиса конвертации (get_exchange_rate).
+    """
     mock_rate = mocker.patch("app.services.wallet.get_exchange_rate")
     mock_kiq = mocker.patch("app.services.wallet.completing_tasks.kiq")
     mock_rate.return_value = Decimal(1.0)
@@ -62,6 +71,15 @@ async def test_succes_transaction(client_test, mock_refresh, mocker):
 
 @pytest.mark.asyncio
 async def test_transaction_different_currency(client_test, mock_refresh, mocker):
+    """
+    Интеграционный тест перевода между кошельками с конвертацией валют.
+
+    Сценарий:
+    1) Проверяет математику конвертаций: корректное зачисление суммы получателю на основе
+    коэффициента exchange_rate (USD -> RUB).
+    2) Проверяет сохранение исходной суммы: списание у отправителя в валюте отправителя.
+    3) Проверяет идемпотентность и фоновые задачи: корректный вызов Taskiq и проверку ключа.
+    """
     mock_rate = mocker.patch("app.services.wallet.get_exchange_rate")
     mock_kiq = mocker.patch("app.services.wallet.completing_tasks.kiq")
     mock_rate.return_value = Decimal(82.00)

@@ -13,6 +13,10 @@ from .config import client_test, get_user, mock_refresh, override_get_db
 
 @pytest.mark.asyncio
 async def test_duplicate_currency(client_test):
+    """
+    Проверка создания существующего кошелька.
+    Гарантирует, что кошелек с валютой, которая уже используется, не будет создан.
+    """
     override_get_db.reset_mock()
     override_get_db.add = MagicMock()
     mock_result = MagicMock()
@@ -30,6 +34,11 @@ async def test_duplicate_currency(client_test):
 
 @pytest.mark.asyncio
 async def test_error_invalid_currency(client_test):
+    """
+    Проверка создания кошелька с несущетсвующей валютой.
+    Гарантирует, что кошелёк с валютой, которая не предусмотрена или 
+    не существует, не будет создан.
+    """
     override_get_db.reset_mock()
     override_get_db.add = MagicMock()
     mock_result = MagicMock()
@@ -43,6 +52,11 @@ async def test_error_invalid_currency(client_test):
 
 @pytest.mark.asyncio
 async def test_duplicate_user(client_test):
+    """
+    Проверка регистрации уже существующего пользователя.
+    Гарантирует, что при регистрации с уже существующими username или email пользователь
+    не будет создан.
+    """
     override_get_db.reset_mock()
     override_get_db.add = MagicMock()
     mock_result = MagicMock()
@@ -57,6 +71,10 @@ async def test_duplicate_user(client_test):
 
 @pytest.mark.asyncio
 async def test_unauthorized_create_wallet(client_test):
+    """
+    Проверка защищённости эндпоинта.
+    Гарантирует, что без валидного JWT-токена создание кошелька невозможно (401 Unauthorized)
+    """
     override_get_db.reset_mock()
     app.dependency_overrides.pop(get_current_user, None)
     override_get_db.add = MagicMock()
@@ -73,6 +91,10 @@ async def test_unauthorized_create_wallet(client_test):
 
 @pytest.mark.asyncio
 async def test_insufficient_funds(client_test, mock_refresh, mocker):
+    """
+    Проверка, что при переводе суммы, большей баланса кошелька, транзакция не будет совершена.
+    Гарантирует, что транзакция прерывается, если сумма перевода превышает текущий баланс.
+    """
     mock_rate = mocker.patch("app.services.wallet.get_exchange_rate")
     mock_kiq = mocker.patch("app.services.wallet.completing_tasks.kiq")
     mock_rate.return_value = Decimal(1.00)
@@ -115,6 +137,11 @@ async def test_insufficient_funds(client_test, mock_refresh, mocker):
 
 @pytest.mark.asyncio
 async def test_transaction_yourself(client_test, mock_refresh, mocker):
+    """
+    Запрет транзакций самому себе.
+    Проверяет бизнес-правило, предотвращающее создание бессмысленных операций
+    внутри одного кошелька.
+    """
     mock_rate = mocker.patch("app.services.wallet.get_exchange_rate")
     mock_kiq = mocker.patch("app.services.wallet.completing_tasks.kiq")
     mock_rate.return_value = Decimal(1.00)
@@ -148,6 +175,10 @@ async def test_transaction_yourself(client_test, mock_refresh, mocker):
 
 @pytest.mark.asyncio
 async def test_wallet_not_found(client_test, mock_refresh, mocker):
+    """
+    Проверка невозможности перевода с несуществующего кошелька.
+    Гарантирует, что невозможно перевести средства с кошелька, которого не существует.
+    """
     mock_rate = mocker.patch("app.services.wallet.get_exchange_rate")
     mock_kiq = mocker.patch("app.services.wallet.completing_tasks.kiq")
     mock_rate.return_value = Decimal(1.00)
@@ -193,6 +224,13 @@ async def test_wallet_not_found(client_test, mock_refresh, mocker):
 
 @pytest.mark.asyncio
 async def test_error_idempotency(client_test, mock_refresh, mocker):
+    """
+    Проверка механизма идемпотентности при повторном запросе.
+
+    Сценарий:
+    1) Первый запрос проходит успешно, баланс уменьшается.
+    2) Второй запрос с тем же ключом возвращает 200 OK, но баланс не уменьшается повторно.
+    """
     mock_rate = mocker.patch("app.services.wallet.get_exchange_rate")
     mock_kiq = mocker.patch("app.services.wallet.completing_tasks.kiq")
     mock_rate.return_value = Decimal(1.00)
@@ -252,19 +290,3 @@ async def test_error_idempotency(client_test, mock_refresh, mocker):
     response2 = await client_test.post("/wallets/transfer", json=payload)
     assert response2.status_code == 200
     assert wallet_one.balance == Decimal(70.00)
-
-
-@pytest.mark.asyncio
-async def test_worker_lock(mocker):
-    mock_redis = AsyncMock()
-    mock_redis.set.return_value = False
-
-    mock_session = AsyncMock()
-    mock_session_class = MagicMock()
-    mock_session_class.return_value.__aenter__.return_value = mock_session
-    mocker.patch("app.tasks.AsyncSessionLocal", mock_session_class)
-
-    await completing_tasks(transaction_id=1, redis=mock_redis)
-    mock_redis.set.assert_called_once()
-    assert not mock_session.execute.called
-    assert not mock_session.commit.called

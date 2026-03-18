@@ -22,5 +22,13 @@ AsyncSessionLocal = async_sessionmaker(
 
 
 async def get_db() -> AsyncGenerator[AsyncSession, None]:
+    """
+    Генератор асинхронных сессий базы данных.
+
+    Особенности:
+    1) Использует как FastAPI Dependency для внедрения сессии в эндпоинты.
+    2) Гарантирует автоматическое закрытие сессии после завершение обработки запроса.
+    3) Использует контекстный менеджер для обеспечения безопасности транзакций.
+    """
     async with AsyncSessionLocal() as session:
         yield session

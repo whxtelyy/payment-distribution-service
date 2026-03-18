@@ -16,6 +16,12 @@ override_get_db = AsyncMock()
 
 @pytest_asyncio.fixture
 async def mock_refresh():
+    """
+    Имитирует поведение метода session.refresh() в SQLAlchemy.
+ 
+    Заполняет объект базовыми атрибутами (id, created_at, balance) после
+    создания записи в мок-базе, чтобы избежать ошибок при обращении к полям.
+    """
     async def _refresh(obj):
         if hasattr(obj, "id"):
             obj.id = 1
@@ -31,10 +37,18 @@ async def mock_refresh():
 
 
 async def get_mock():
+    """
+    Yield-оператор для подмены сессии БД в тестах.
+    Использует AsyncMock() для перехвата вызовов к базе данных.
+    """
     yield override_get_db
 
 
 async def get_user():
+    """
+    Создает объект тестового пользователя для обхода аутентификации.
+    Пароль по умолчанию: '12345'.
+    """
     pw = get_password_hash("12345")
     return User(
         id=1,
@@ -48,6 +62,14 @@ async def get_user():
 
 @pytest_asyncio.fixture
 async def client_test():
+    """
+    Создает ассинхронный тестовый клиент для API.
+
+    Особенности:
+    1) Dependency Injection: заменяет реальную БД на мок-объект.
+    2) Auth: подменяет получение текущего пользователя на тестовый экземпляр.
+    3) Cleanup: автоматически очищает dependency_overrides после завершения теста.
+    """
     app.dependency_overrides[get_db] = get_mock
     app.dependency_overrides[get_current_user] = get_user
     async with AsyncClient(

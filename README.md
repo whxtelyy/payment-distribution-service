@@ -1,4 +1,4 @@
-# 💳 Wallet Payment Service: Архитектура и Системный дизайн
+# 💳 Payment Distribution Service: Архитектура и Системный дизайн
 
 Высоконагруженный асинхронный микросервис для управления мультивалютными кошельками, проведения транзакций и конвертации валют. Проект спроектирован с упором на отказоустойчивость, финансовую точность и защиту от классических проблем распределенных систем (Race Conditions, Deadlocks, Double Spending).
 
@@ -8,16 +8,16 @@
 
 ## 📋 Оглавление
 
-1.  [Архитектура системы]()
-2.  [Ключевые паттерны и бизнес-логика]()
-      - [Идемпотентность (Anti-Double Spend)]()
-      - [Защита от Deadlocks]()
-      - [Распределенные блокировки и Воркеры]()
-      - [Финансовая точность]()
-3.  [Стек технологий]()
-4.  [Инфраструктура и Развертывание (Docker)]()
-5.  [Тестирование]()
-6.  [Быстрый старт]()
+1.  [Архитектура системы](https://github.com/whxtelyy/payment-distribution-service/tree/dev?tab=readme-ov-file#1-%D0%B0%D1%80%D1%85%D0%B8%D1%82%D0%B5%D0%BA%D1%82%D1%83%D1%80%D0%B0-%D1%81%D0%B8%D1%81%D1%82%D0%B5%D0%BC%D1%8B)
+2.  [Ключевые паттерны и бизнес-логика](https://github.com/whxtelyy/payment-distribution-service/tree/dev?tab=readme-ov-file#2-%D0%BA%D0%BB%D1%8E%D1%87%D0%B5%D0%B2%D1%8B%D0%B5-%D0%BF%D0%B0%D1%82%D1%82%D0%B5%D1%80%D0%BD%D1%8B-%D0%B8-%D0%B1%D0%B8%D0%B7%D0%BD%D0%B5%D1%81-%D0%BB%D0%BE%D0%B3%D0%B8%D0%BA%D0%B0)
+      - [Идемпотентность (Anti-Double Spend)](https://github.com/whxtelyy/payment-distribution-service/tree/dev?tab=readme-ov-file#2-%D0%BA%D0%BB%D1%8E%D1%87%D0%B5%D0%B2%D1%8B%D0%B5-%D0%BF%D0%B0%D1%82%D1%82%D0%B5%D1%80%D0%BD%D1%8B-%D0%B8-%D0%B1%D0%B8%D0%B7%D0%BD%D0%B5%D1%81-%D0%BB%D0%BE%D0%B3%D0%B8%D0%BA%D0%B0)
+      - [Защита от Deadlocks](https://github.com/whxtelyy/payment-distribution-service/tree/dev?tab=readme-ov-file#2-%D0%BA%D0%BB%D1%8E%D1%87%D0%B5%D0%B2%D1%8B%D0%B5-%D0%BF%D0%B0%D1%82%D1%82%D0%B5%D1%80%D0%BD%D1%8B-%D0%B8-%D0%B1%D0%B8%D0%B7%D0%BD%D0%B5%D1%81-%D0%BB%D0%BE%D0%B3%D0%B8%D0%BA%D0%B0)
+      - [Распределенные блокировки и Воркеры](https://github.com/whxtelyy/payment-distribution-service/tree/dev?tab=readme-ov-file#2-%D0%BA%D0%BB%D1%8E%D1%87%D0%B5%D0%B2%D1%8B%D0%B5-%D0%BF%D0%B0%D1%82%D1%82%D0%B5%D1%80%D0%BD%D1%8B-%D0%B8-%D0%B1%D0%B8%D0%B7%D0%BD%D0%B5%D1%81-%D0%BB%D0%BE%D0%B3%D0%B8%D0%BA%D0%B0)
+      - [Финансовая точность](https://github.com/whxtelyy/payment-distribution-service/tree/dev?tab=readme-ov-file#2-%D0%BA%D0%BB%D1%8E%D1%87%D0%B5%D0%B2%D1%8B%D0%B5-%D0%BF%D0%B0%D1%82%D1%82%D0%B5%D1%80%D0%BD%D1%8B-%D0%B8-%D0%B1%D0%B8%D0%B7%D0%BD%D0%B5%D1%81-%D0%BB%D0%BE%D0%B3%D0%B8%D0%BA%D0%B0)
+3.  [Стек технологий](https://github.com/whxtelyy/payment-distribution-service/tree/dev?tab=readme-ov-file#2-%D0%BA%D0%BB%D1%8E%D1%87%D0%B5%D0%B2%D1%8B%D0%B5-%D0%BF%D0%B0%D1%82%D1%82%D0%B5%D1%80%D0%BD%D1%8B-%D0%B8-%D0%B1%D0%B8%D0%B7%D0%BD%D0%B5%D1%81-%D0%BB%D0%BE%D0%B3%D0%B8%D0%BA%D0%B0)
+4.  [Инфраструктура и Развертывание (Docker)](https://github.com/whxtelyy/payment-distribution-service/tree/dev?tab=readme-ov-file#2-%D0%BA%D0%BB%D1%8E%D1%87%D0%B5%D0%B2%D1%8B%D0%B5-%D0%BF%D0%B0%D1%82%D1%82%D0%B5%D1%80%D0%BD%D1%8B-%D0%B8-%D0%B1%D0%B8%D0%B7%D0%BD%D0%B5%D1%81-%D0%BB%D0%BE%D0%B3%D0%B8%D0%BA%D0%B0)
+5.  [Тестирование](https://github.com/whxtelyy/payment-distribution-service/tree/dev?tab=readme-ov-file#2-%D0%BA%D0%BB%D1%8E%D1%87%D0%B5%D0%B2%D1%8B%D0%B5-%D0%BF%D0%B0%D1%82%D1%82%D0%B5%D1%80%D0%BD%D1%8B-%D0%B8-%D0%B1%D0%B8%D0%B7%D0%BD%D0%B5%D1%81-%D0%BB%D0%BE%D0%B3%D0%B8%D0%BA%D0%B0)
+6.  [Быстрый старт](https://github.com/whxtelyy/payment-distribution-service/tree/dev?tab=readme-ov-file#2-%D0%BA%D0%BB%D1%8E%D1%87%D0%B5%D0%B2%D1%8B%D0%B5-%D0%BF%D0%B0%D1%82%D1%82%D0%B5%D1%80%D0%BD%D1%8B-%D0%B8-%D0%B1%D0%B8%D0%B7%D0%BD%D0%B5%D1%81-%D0%BB%D0%BE%D0%B3%D0%B8%D0%BA%D0%B0)
 
 -----
 
@@ -28,9 +28,9 @@
   * **API Gateway / Core Service (FastAPI):** Принимает запросы пользователей, валидирует данные, взаимодействует с БД и отправляет задачи в очередь. Работает в полностью асинхронном режиме.
   * **Relational Database (PostgreSQL):** Хранит состояние кошельков, пользователей и историю транзакций. Является единым источником истины (Single Source of Truth), обеспечивает выполнение ACID-требований.
   * **In-Memory Cache & Message Broker (Redis):** Выполняет три роли:
-    1)  Брокер сообщений для фоновых задач.
-    2)  Хранилище распределенных блокировок (Distributed Locks).
-    3)  Кэш для внешних данных (курсы валют от API ЦБ РФ с TTL = 1 час).
+    1.  Брокер сообщений для фоновых задач.
+    2.  Хранилище распределенных блокировок (Distributed Locks).
+    3.  Кэш для внешних данных (курсы валют от API ЦБ РФ с TTL = 1 час).
   * **Background Worker (Taskiq):** Асинхронно обрабатывает «тяжелые» или отложенные задачи (например, финализацию транзакций и отправку уведомлений), снимая нагрузку с основного API.
 
 -----
@@ -110,18 +110,18 @@
   * **Dependency Injection:** В тестах реальная база данных подменяется на моки (Mock Objects) через `app.dependency_overrides`. Это позволяет прогонять сотни тестов за доли секунды без поднятия СУБД.
   * **SQLAlchemy Mocks:** Написана кастомная фикстура `mock_refresh`, имитирующая поведение БД после `commit()` (генерация ID и дефолтных значений).
   * **Сценарии:**
-    1) **Аутентификация и Жизненный цикл (test_api.py):**
+    1. **Аутентификация и Жизненный цикл (test_api.py):**
         * Регистрация новых пользователей и валидация уникальности данных.
         * Проверка успешного Login-процесса и выдачи JWT-токенов.
         * Инициализация первого кошелька пользователя и привязка к профилю.
-    2) **Бизнес-логика транзакций (test_transactions.py):**
+    2. **Бизнес-логика транзакций (test_transactions.py):**
         * Atomic Transfers: Успешный перевод между кошельками в одной валюте.
         * Currency Exchange: Корректность кросс-валютных переводов с использованием динамических курсов.
         * Verification: Проверка автоматического вызова фоновых задач (Taskiq) для финализации транзакций.
-    3) **Работа Воркера и Конкурентность (test_worker.py):**
+    3. **Работа Воркера и Конкурентность (test_worker.py):**
         * Happy Path: Полный цикл завершения транзакции фоновым процессом.
         * Race Condition Protection: Проверка механизма предотвращения Double Spending. Если один воркер захватил замок в Redis, второй обязан прервать операцию.
-    4) **Обработка ошибок и Edge Cases (test_errors.py):**
+    4. **Обработка ошибок и Edge Cases (test_errors.py):**
         * Валидация сущностей: Запрет создания дубликатов кошельков или кошельков с несуществующими валютами (USD, RUB, EUR).
         * Безопасность: Проверка защиты эндпоинтов (запрет доступа неавторизованным пользователям).
         * Финансовые ограничения:

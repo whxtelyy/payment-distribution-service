@@ -27,9 +27,8 @@ def setup_logging():
         formatter = logging.Formatter(
             "%(asctime)s [%(levelname)s] [PID:%(process)d]: %(message)s"
         )
-        file_handler.setFormatter(formatter)
 
-        app_logger = logging.getLogger("app")
+        file_handler.setFormatter(formatter)
         root_logger = logging.getLogger()
         if not any(isinstance(h, RotatingFileHandler) for h in root_logger.handlers):
             root_logger.addHandler(file_handler)

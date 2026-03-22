@@ -1,7 +1,10 @@
+import os
+
 import sentry_sdk
 from sentry_sdk.integrations.fastapi import FastApiIntegration
+
 from app.core.config import settings
-import os
+
 
 def init_sentry():
     if settings.SENTRY_DSN:

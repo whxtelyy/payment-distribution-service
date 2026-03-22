@@ -1,0 +1,17 @@
+from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.db.session import get_db
+from app.models.user import User
+from app.schemas.user import UserCreate, UserRead
+from app.services.user import create_user, get_user_by_email
+
+router = APIRouter(prefix="/users", tags=["users"])
+
+
+@router.post("/", response_model=UserRead, status_code=201)
+async def registration(user: UserCreate, db: AsyncSession = Depends(get_db)) -> User:
+    if await get_user_by_email(user.email, db) is not None:
+        raise HTTPException(status_code=400, detail="User already exists")
+    new_user = await create_user(user, db)
+    return new_user

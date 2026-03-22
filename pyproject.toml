@@ -26,7 +26,8 @@ dependencies = [
     "python-multipart (>=0.0.22,<0.0.23)",
     "pyjwt (>=2.11.0,<3.0.0)",
     "taskiq (>=0.12.1,<0.13.0)",
-    "taskiq-redis (>=1.2.2,<2.0.0)"
+    "taskiq-redis (>=1.2.2,<2.0.0)",
+    "sentry-sdk[fastapi] (>=2.55.0,<3.0.0)"
 ]
 
 

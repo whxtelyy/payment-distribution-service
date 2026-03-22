@@ -15,6 +15,7 @@ class Settings(BaseSettings):
     REDIS_DB: int
     ADMIN_EMAIL: str
     ADMIN_USERNAME: str
+    SENTRY_DSN: str
 
     model_config = SettingsConfigDict(
         env_file=".env", env_file_encoding="utf-8", extra="ignore"

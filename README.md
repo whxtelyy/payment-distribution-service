@@ -85,7 +85,7 @@
     * **Multipart:** python-multipart для обработки сложных запросов
   * **Observability:**
     * **Logging:** Python Standart Logging (RotatingFileHandler)
-    * **Error Tracking:** Sentry (planned)
+    * **Error Tracking:** Sentry
   * **Deployment & Testing:**
     * **Testing:** Pytest, pytest-asyncio, pytest-mock, httpx (интеграционные тесты)
     * **Code Quality:** Ruff (linter), Black (formatter), Mypy (static type checking), isort
